@@ -1,41 +1,102 @@
-import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import icon from '../../assets/icon.svg';
-import './App.css';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import {
+  MemoryRouter as Router,
+  Routes,
+  Route,
+  NavLink,
+} from 'react-router-dom';
+import { Col, Nav, NavItem, TabContent, Table, TabPane } from 'reactstrap';
+import { useCallback, useEffect, useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
+interface AdressInterface {
+  name: string;
+  address: string;
+}
 const Hello = () => {
+  const [addresses, setAddresses] = useState<AdressInterface[]>([]);
+  const [connection, setConnection] = useState(false);
+  const updater = useCallback(() => {
+    window.electron.ipcRenderer.sendMessage('get-connection-and-adresses', []);
+    setTimeout(() => updater(), 1500);
+  }, []);
+  useEffect(() => {
+    // const { ipcRenderer } = window.electron;
+    window.electron.ipcRenderer.once(
+      'get-connection-and-adresses',
+      (args: any) => {
+        setConnection(args.connections);
+        setAddresses(args.addresses);
+      }
+    );
+    updater();
+    // // calling IPC exposed from preload script
+    // window.electron.ipcRenderer.once('ipc-example', (arg) => {
+    //   // eslint-disable-next-line no-console
+    //   console.log(arg);
+    // });
+    // window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);
+  }, [updater]);
+  // State for current active Tab
+  const [currentActiveTab, setCurrentActiveTab] = useState('1');
+
+  // Toggle active state for Tab
+  const toggle = (tab: string) => {
+    if (currentActiveTab !== tab) setCurrentActiveTab(tab);
+  };
   return (
-    <div>
-      <div className="Hello">
-        <img width="200" alt="icon" src={icon} />
-      </div>
-      <h1>electron-react-boilerplate</h1>
-      <div className="Hello">
-        <a
-          href="https://electron-react-boilerplate.js.org/"
-          target="_blank"
-          rel="noreferrer"
+    <Col style={{ fontSize: '14px' }}>
+      <Nav pills>
+        <NavItem
+          active={currentActiveTab === '1'}
+          onClick={() => {
+            toggle('1');
+          }}
         >
-          <button type="button">
-            <span role="img" aria-label="books">
-              📚
-            </span>
-            Read our docs
-          </button>
-        </a>
-        <a
-          href="https://github.com/sponsors/electron-react-boilerplate"
-          target="_blank"
-          rel="noreferrer"
+          <NavLink to="#">General</NavLink>
+        </NavItem>
+        <NavItem
+          active={currentActiveTab === '1'}
+          onClick={() => {
+            toggle('2');
+          }}
         >
-          <button type="button">
-            <span role="img" aria-label="books">
-              🙏
-            </span>
-            Donate
-          </button>
-        </a>
-      </div>
-    </div>
+          <NavLink to="#">Ports</NavLink>
+        </NavItem>
+      </Nav>
+      <TabContent activeTab={currentActiveTab}>
+        <TabPane tabId="1">
+          <Table>
+            <thead>
+              <tr>
+                <td>Interface</td>
+                <td>Ip</td>
+              </tr>
+            </thead>
+            <tbody>
+              {addresses.map((item) => (
+                <tr key={item.name}>
+                  <td>{item.name}</td>
+                  <td>{item.address}</td>
+                </tr>
+              ))}
+              <tr>
+                <td>Connection</td>
+                <td>
+                  <span style={{ color: connection ? 'green' : 'red' }}>
+                    {connection ? 'Connected' : 'Not connected'}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </Table>
+        </TabPane>
+        <TabPane tabId="2">Soon</TabPane>
+      </TabContent>
+    </Col>
   );
 };
 
