@@ -20,25 +20,20 @@ const Hello = () => {
   const [addresses, setAddresses] = useState<AdressInterface[]>([]);
   const [connection, setConnection] = useState(false);
   const updater = useCallback(() => {
+    console.log('aaa');
     window.electron.ipcRenderer.sendMessage('get-connection-and-adresses', []);
     setTimeout(() => updater(), 1500);
   }, []);
   useEffect(() => {
-    // const { ipcRenderer } = window.electron;
     window.electron.ipcRenderer.once(
       'get-connection-and-adresses',
       (args: any) => {
+        console.log('bbb');
         setConnection(args.connections);
         setAddresses(args.addresses);
       }
     );
     updater();
-    // // calling IPC exposed from preload script
-    // window.electron.ipcRenderer.once('ipc-example', (arg) => {
-    //   // eslint-disable-next-line no-console
-    //   console.log(arg);
-    // });
-    // window.electron.ipcRenderer.sendMessage('ipc-example', ['ping']);
   }, [updater]);
   // State for current active Tab
   const [currentActiveTab, setCurrentActiveTab] = useState('1');
