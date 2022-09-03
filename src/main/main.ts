@@ -17,8 +17,12 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import os, { NetworkInterfaceInfo } from 'os';
 import axios from 'axios';
+import electronDebug from 'electron-debug';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { AdressInterface, JsonDataBaseInterface } from '../interfaces';
+
+// import { readFileSync, writeFileSync } from 'fs';
 
 class AppUpdater {
   constructor() {
@@ -27,57 +31,57 @@ class AppUpdater {
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
-interface AdressInterface {
-  name: string;
-  address: string;
-}
-interface JsonDataBaseInterface {
-  connection?: boolean;
-  addresses?: AdressInterface[];
-}
 const jsonDatabase: JsonDataBaseInterface = {
   connection: false,
   addresses: [],
+  error: '',
 };
-const fetchInterfaces = async () => {
-  let lastInterfaces: NodeJS.Dict<NetworkInterfaceInfo[]> = {};
-  const addressesAll: AdressInterface[] = [];
-  const interfacesReal: NodeJS.Dict<NetworkInterfaceInfo[]> =
-    os.networkInterfaces();
-  if (interfacesReal !== lastInterfaces && interfacesReal !== null) {
-    lastInterfaces = interfacesReal;
-    try {
-      const ip = await axios.get('https://api.ipify.org');
-      if (ip?.data) {
-        jsonDatabase.connection = true;
-        addressesAll.push({ name: 'WAN', address: ip.data });
-      } else jsonDatabase.connection = false;
-    } catch (err) {
-      jsonDatabase.connection = true;
-    }
-    for (const key of Object.keys(interfacesReal)) {
-      const k: NetworkInterfaceInfo[] = interfacesReal[
-        key
-      ] as NetworkInterfaceInfo[];
-      for (const k2 of k) {
-        if (k2.family === 'IPv4' && !k2.internal) {
-          addressesAll.push({ name: key, address: k2.address });
+let mainWindow: BrowserWindow | null = null;
+const getInterfaces = async () => {
+  try {
+    const addressesAll: AdressInterface[] = [];
+    const interfacesReal: NodeJS.Dict<NetworkInterfaceInfo[]> =
+      os.networkInterfaces();
+    if (interfacesReal !== null) {
+      try {
+        const ip = await axios.get('https://api.ipify.org');
+        if (ip?.data) {
+          jsonDatabase.connection = true;
+          addressesAll.push({ name: 'WAN', address: ip.data });
+        } else jsonDatabase.connection = false;
+      } catch (err) {
+        jsonDatabase.connection = false;
+      }
+      // eslint-disable-next-line no-restricted-syntax
+      for (const key of Object.keys(interfacesReal)) {
+        const k: NetworkInterfaceInfo[] = interfacesReal[
+          key
+        ] as NetworkInterfaceInfo[];
+        // eslint-disable-next-line no-restricted-syntax
+        for (const k2 of k) {
+          if (k2.family === 'IPv4' && !k2.internal) {
+            addressesAll.push({ name: key, address: k2.address });
+          }
         }
       }
     }
+    jsonDatabase.addresses = addressesAll;
+  } catch (err: any) {
+    jsonDatabase.addresses = [];
+    jsonDatabase.connection = false;
+    jsonDatabase.error = err.toString();
   }
-  jsonDatabase.addresses = addressesAll;
-  setTimeout(() => fetchInterfaces(), 1000);
+  // writeFileSync(
+  //   'C:/test/test.txt',
+  //   `${readFileSync('C:/test/test.txt', 'utf-8')}
+  //   ${JSON.stringify(jsonDatabase)}`,
+  //   'utf-8'
+  // );
+  return jsonDatabase;
 };
-fetchInterfaces();
-let mainWindow: BrowserWindow | null = null;
-
-ipcMain.on('get-connection-and-adresses', async (event) => {
-  const returnData: JsonDataBaseInterface = {
-    connection: jsonDatabase.connection,
-    addresses: jsonDatabase.addresses,
-  };
-  event.reply('get-connection-and-adresses', returnData);
+ipcMain.on('get-connection-and-ip-adresses', async (event) => {
+  await getInterfaces();
+  event.reply('get-connection-and-ip-adresses', jsonDatabase);
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -178,6 +182,7 @@ app
   .whenReady()
   .then(() => {
     createWindow();
+    electronDebug({ showDevTools: false });
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.

@@ -8,29 +8,39 @@ import {
   Route,
   NavLink,
 } from 'react-router-dom';
-import { Col, Nav, NavItem, TabContent, Table, TabPane } from 'reactstrap';
+import {
+  Card,
+  CardBody,
+  Col,
+  Nav,
+  NavItem,
+  TabContent,
+  Table,
+  TabPane,
+} from 'reactstrap';
 import { useCallback, useEffect, useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/scss/bootstrap.scss';
+import { AdressInterface } from '../interfaces';
+// import './App.global.css';
 
-interface AdressInterface {
-  name: string;
-  address: string;
-}
 const Hello = () => {
   const [addresses, setAddresses] = useState<AdressInterface[]>([]);
   const [connection, setConnection] = useState(false);
+  const [error, setError] = useState('');
   const updater = useCallback(() => {
-    console.log('aaa');
-    window.electron.ipcRenderer.sendMessage('get-connection-and-adresses', []);
-    setTimeout(() => updater(), 1500);
+    window.electron.ipcRenderer.sendMessage(
+      'get-connection-and-ip-adresses',
+      []
+    );
+    setTimeout(() => updater(), 1000);
   }, []);
   useEffect(() => {
-    window.electron.ipcRenderer.once(
-      'get-connection-and-adresses',
+    window.electron.ipcRenderer.on(
+      'get-connection-and-ip-adresses',
       (args: any) => {
-        console.log('bbb');
-        setConnection(args.connections);
+        setConnection(args.connection);
         setAddresses(args.addresses);
+        setError(args.error);
       }
     );
     updater();
@@ -44,6 +54,7 @@ const Hello = () => {
   };
   return (
     <Col style={{ fontSize: '14px' }}>
+      {error && error}
       <Nav pills>
         <NavItem
           active={currentActiveTab === '1'}
@@ -54,7 +65,7 @@ const Hello = () => {
           <NavLink to="#">General</NavLink>
         </NavItem>
         <NavItem
-          active={currentActiveTab === '1'}
+          active={currentActiveTab === '2'}
           onClick={() => {
             toggle('2');
           }}
@@ -91,6 +102,9 @@ const Hello = () => {
         </TabPane>
         <TabPane tabId="2">Soon</TabPane>
       </TabContent>
+      <Card>
+        <CardBody color="success">test</CardBody>
+      </Card>
     </Col>
   );
 };
