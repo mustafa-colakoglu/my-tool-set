@@ -2,26 +2,19 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import {
-  MemoryRouter as Router,
-  Routes,
-  Route,
-  NavLink,
-} from 'react-router-dom';
-import {
-  Card,
-  CardBody,
   Col,
   Nav,
   NavItem,
+  NavLink,
   TabContent,
   Table,
   TabPane,
 } from 'reactstrap';
 import { useCallback, useEffect, useState } from 'react';
-import 'bootstrap/scss/bootstrap.scss';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { AdressInterface } from '../interfaces';
-// import './App.global.css';
 
 const Hello = () => {
   const [addresses, setAddresses] = useState<AdressInterface[]>([]);
@@ -57,20 +50,22 @@ const Hello = () => {
       {error && error}
       <Nav pills>
         <NavItem
-          active={currentActiveTab === '1'}
           onClick={() => {
             toggle('1');
           }}
         >
-          <NavLink to="#">General</NavLink>
+          <NavLink to="#" active={currentActiveTab === '1'}>
+            General
+          </NavLink>
         </NavItem>
         <NavItem
-          active={currentActiveTab === '2'}
           onClick={() => {
             toggle('2');
           }}
         >
-          <NavLink to="#">Ports</NavLink>
+          <NavLink to="#" active={currentActiveTab === '2'}>
+            Ports
+          </NavLink>
         </NavItem>
       </Nav>
       <TabContent activeTab={currentActiveTab}>
@@ -102,9 +97,6 @@ const Hello = () => {
         </TabPane>
         <TabPane tabId="2">Soon</TabPane>
       </TabContent>
-      <Card>
-        <CardBody color="success">test</CardBody>
-      </Card>
     </Col>
   );
 };
