@@ -14,7 +14,7 @@ import {
 } from 'reactstrap';
 import { useCallback, useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { AdressInterface } from '../interfaces';
+import { AdressInterface, Channels } from '../interfaces';
 
 const Hello = () => {
   const [addresses, setAddresses] = useState<AdressInterface[]>([]);
@@ -22,14 +22,14 @@ const Hello = () => {
   const [error, setError] = useState('');
   const updater = useCallback(() => {
     window.electron.ipcRenderer.sendMessage(
-      'get-connection-and-ip-adresses',
+      Channels.getConnectionAndIpAddresses,
       []
     );
     setTimeout(() => updater(), 1000);
   }, []);
   useEffect(() => {
     window.electron.ipcRenderer.on(
-      'get-connection-and-ip-adresses',
+      Channels.getConnectionAndIpAddresses,
       (args: any) => {
         setConnection(args.connection);
         setAddresses(args.addresses);
@@ -76,9 +76,6 @@ const Hello = () => {
           <NavLink to="#" active={currentActiveTab === '3'}>
             Info
           </NavLink>
-        </NavItem>
-        <NavItem>
-          <NavLink>Exit</NavLink>
         </NavItem>
       </Nav>
       <TabContent activeTab={currentActiveTab}>

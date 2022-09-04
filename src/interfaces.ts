@@ -7,3 +7,6 @@ export interface JsonDataBaseInterface {
   addresses?: AdressInterface[];
   error?: string;
 }
+export enum Channels {
+  getConnectionAndIpAddresses = 'get-connection-and-ip-adresses',
+}

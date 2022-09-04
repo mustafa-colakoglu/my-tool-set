@@ -1,6 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-
-export type Channels = 'get-connection-and-ip-adresses';
+import { Channels } from '../interfaces';
 
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
