@@ -53,6 +53,7 @@ const Hello = () => {
           onClick={() => {
             toggle('1');
           }}
+          siz
         >
           <NavLink to="#" active={currentActiveTab === '1'}>
             General
@@ -66,6 +67,18 @@ const Hello = () => {
           <NavLink to="#" active={currentActiveTab === '2'}>
             Ports
           </NavLink>
+        </NavItem>
+        <NavItem
+          onClick={() => {
+            toggle('3');
+          }}
+        >
+          <NavLink to="#" active={currentActiveTab === '3'}>
+            Info
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink>Exit</NavLink>
         </NavItem>
       </Nav>
       <TabContent activeTab={currentActiveTab}>
@@ -96,6 +109,19 @@ const Hello = () => {
           </Table>
         </TabPane>
         <TabPane tabId="2">Soon</TabPane>
+        <TabPane tabId="3">
+          Developed By Mustafa Çolakoğlu <br />
+          Github :{' '}
+          <a
+            href="https://github.com/mustafa-colakoglu"
+            target="_blank"
+            rel="noreferrer"
+          >
+            mustafa-colakoglu
+          </a>
+          <br />
+          Give me a coffee : 1L5vbDXSZbnMgmqYHKfbQywM8NtaDfJBhu
+        </TabPane>
       </TabContent>
     </Col>
   );
