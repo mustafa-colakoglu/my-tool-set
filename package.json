@@ -114,6 +114,7 @@
     "electron-log": "^4.4.8",
     "electron-updater": "^5.2.1",
     "esleep": "^1.0.3",
+    "mini-css-extract-plugin": "^2.6.1",
     "os": "^0.1.2",
     "os-browserify": "^0.3.0",
     "react": "^18.2.0",
